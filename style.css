@@ -58,5 +58,14 @@ body{
 
 .action-btn-container>*{
     width: 50%;
-    
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 2rem;
+    height: 100%;
 }
+
+.action-btn-container>*:hover{
+    background-color: #ea8685;
+}
+
