@@ -69,3 +69,44 @@ body{
     background-color: #ea8685;
 }
 
+.modal-container{
+    height: 50vh;
+    width: 45vw;
+    background: lightblue;
+    position: absolute;
+    top: calc( ( 100vh - 50vh ) / 2 );
+    left: calc( ( 100vw - 45vw) / 2);
+    display: none;
+    border: 1px solid black;
+    
+}
+
+.textarea-cont{
+    height: 100%;
+    width: 75%;
+    border: none;
+    resize: none;
+    background: #dcdde1;
+    padding: 2rem;
+    font-size: 1.5rem;
+    font-family: cursive;
+}
+
+.priority-colors-cont{
+    height: 100%;
+    width: 25%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-around;
+    background-color: #182C61;
+}
+
+.priority-color{
+    height: 3rem;
+    width: 55%;
+}
+
+.border{
+    border: 6px solid #dcdde1;
+}
