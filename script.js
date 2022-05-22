@@ -73,6 +73,8 @@ function createTicket(ticketColor, ticketTask, ticketID){
 
     handleLock(ticketCont);
     handleRemoval(ticketCont);
+
+    return;
 }
 
 
@@ -89,16 +91,19 @@ function handleLock(ticket)
 {
     let ticketLockElem = ticket.querySelector(".ticket-lock");
     let ticketLock = ticketLockElem.children[0];
+    let ticketTaskArea = ticket.querySelector(".task-area");
     ticketLock.addEventListener("click", (e)=>{
         if(ticketLock.classList.contains(lockClass))
         {
             ticketLock.classList.remove(lockClass);
             ticketLock.classList.add(unlockClass);
+            ticketTaskArea.setAttribute("contenteditable", "true");
         }
         else
         {
             ticketLock.classList.remove(unlockClass);
             ticketLock.classList.add(lockClass);
+            ticketTaskArea.setAttribute("contenteditable", "false");
         }
     })
 }
