@@ -118,7 +118,7 @@ body{
 }
 .ticket-color{
     height: 1rem;
-    background-color: lightpink;
+    /* background-color: lightpink; */
 }
 .ticket-id{
     height: 2rem;
@@ -136,4 +136,14 @@ body{
     padding: 2rem;
     gap: 2rem;
     justify-content: center;
+}
+
+.ticket-lock{
+    height: 1.5rem;
+    background-color: #f1f2f6;
+    display: flex;
+    padding-right: 1rem;
+    flex-direction: row-reverse;
+    font-size: 1.2rem;
+    color: #182C61;
 }
