@@ -52,9 +52,9 @@ modalCont.addEventListener("keydown", (e)=>
     if(key=="Shift")
     {
         createTicket(modalPriorityColor, textareaCont.value, shortid());
-        modalCont.style.display = "none";
         addFlag = false;
         textareaCont.value = "";
+        modalCont.style.display = "none";
     }
 })
 
@@ -72,9 +72,8 @@ function createTicket(ticketColor, ticketTask, ticketID){
     mainCont.appendChild(ticketCont);
 
     handleLock(ticketCont);
+    handleColor(ticketCont);
     handleRemoval(ticketCont);
-
-    return;
 }
 
 
@@ -105,5 +104,25 @@ function handleLock(ticket)
             ticketLock.classList.add(lockClass);
             ticketTaskArea.setAttribute("contenteditable", "false");
         }
+    })
+}
+
+
+
+function handleColor(ticket){
+    let ticketColor = ticket.querySelector(".ticket-color");
+    ticketColor.addEventListener("click", (e)=>{
+        let currentTicketColor = ticketColor.classList[1];
+        // Get Ticket color idx
+        let currentTicketColorIdx = colors.findIndex((color)=>
+        {
+            return currentTicketColor === color;
+        })
+        console.log(currentTicketColor, currentTicketColorIdx);
+        currentTicketColorIdx++;
+        let newTicketColorIdx = currentTicketColorIdx % colors.length;
+        let newTicketColor = colors[newTicketColorIdx];
+        ticketColor.classList.remove(currentTicketColor);
+        ticketColor.classList.add(newTicketColor);
     })
 }
