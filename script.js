@@ -1,128 +1,217 @@
 let addBtn = document.querySelector(".add-btn");
 let modalCont = document.querySelector(".modal-container");
-let mainCont = document.querySelector(".main-container")
-let textareaCont = document.querySelector(".textarea-cont")
-let allPriorityColors = document.querySelectorAll(".priority-color")
+let mainCont = document.querySelector(".main-container");
+let textareaCont = document.querySelector(".textarea-cont");
+let allPriorityColors = document.querySelectorAll(".priority-color");
 let removeBtn = document.querySelector(".remove-btn");
 let lockElem = document.querySelector(".ticket-lock");
+let toolBoxColors = document.querySelectorAll(".color");
 
-
-let colors = ["pr-1", "pr-2", "pr-3", "pr-4"]
-let modalPriorityColor = "pr-4";
+let colors = ["pr-1", "pr-2", "pr-3", "pr-4"];
+let modalPriorityColor = colors[colors.length - 1];
 let addFlag = false;
 let removeFlag = false;
 
 let lockClass = "fa-lock";
 let unlockClass = "fa-lock-open";
 
-addBtn.addEventListener("click", (e)=>{
-    // generate modal
-    
-    // if addflag = true -> display modal
-    // addFlag = false -> modal none
-    addFlag = !addFlag;
-    if(addFlag){
-        modalCont.style.display = "flex";
+let ticketsArr = [];
+
+if(localStorage.getItem("jira_tickets"))
+{
+  // retrieve and display tickets
+  ticketsArr = JSON.parse(localStorage.getItem("jira_tickets"));
+  ticketsArr.forEach((ticketObj)=>{
+    createTicket(ticketObj.ticketColor, ticketObj.ticketTask, ticketObj.ticketID);
+  })
+}
+
+for (let i = 0; i < toolBoxColors.length; i++) {
+  toolBoxColors[i].addEventListener("click", (e) => {
+    let currentToolBoxColor = toolBoxColors[i].classList[0];
+
+    let filteredTickets = ticketsArr.filter((ticketObj, idx) => {
+      return currentToolBoxColor === ticketObj.ticketColor;
+    });
+
+    //Remove previous tickets
+    let allTicketsCont = document.querySelectorAll(".ticket-cont");
+    for (let i = 0; i < allTicketsCont.length; i++) {
+      allTicketsCont[i].remove();
     }
-    else{
-        modalCont.style.display = "none";
-    }
-})
 
+    // Display new filtered tickets
+    filteredTickets.forEach((ticketObj, idx) => {
+      createTicket(
+        ticketObj.ticketColor,
+        ticketObj.ticketTask,
+        ticketObj.ticketID
+      );
+    });
 
-removeBtn.addEventListener("click", (e)=>{
-    removeFlag = !removeFlag;
-})
-
+    toolBoxColors[i].addEventListener("dblclick", (e) => {
+      //Remove previous tickets
+      let allTicketsCont = document.querySelectorAll(".ticket-cont");
+      for (let i = 0; i < allTicketsCont.length; i++) {
+        allTicketsCont[i].remove();
+      }
+      ticketsArr.forEach((ticketObj, idx) => {
+        createTicket(
+          ticketObj.ticketColor,
+          ticketObj.ticketTask,
+          ticketObj.ticketID
+        );
+      });
+    });
+  });
+}
 
 // Listener for modal priority coloring
-allPriorityColors.forEach((colorElem, idx)=>{
-    colorElem.addEventListener("click", (e)=>{
-         allPriorityColors.forEach((priorityColorElem, idx)=>{
-             priorityColorElem.classList.remove("border");
-         })
-         colorElem.classList.add("border");
-         modalPriorityColor = colorElem.classList[0];
-    })
-})
+allPriorityColors.forEach((colorElem, idx) => {
+  colorElem.addEventListener("click", (e) => {
+    allPriorityColors.forEach((priorityColorElem, idx) => {
+      priorityColorElem.classList.remove("border");
+    });
+    colorElem.classList.add("border");
+    modalPriorityColor = colorElem.classList[0];
+  });
+});
 
-modalCont.addEventListener("keydown", (e)=>
-{
-    let key = e.key;
-    if(key=="Shift")
-    {
-        createTicket(modalPriorityColor, textareaCont.value, shortid());
-        addFlag = false;
-        textareaCont.value = "";
-        modalCont.style.display = "none";
-    }
-})
+addBtn.addEventListener("click", (e) => {
+  // generate modal
 
-function createTicket(ticketColor, ticketTask, ticketID){
-    let ticketCont = document.createElement("div");
-    ticketCont.setAttribute("class", "ticket-cont");
-    ticketCont.innerHTML = `
+  // if addflag = true -> display modal
+  // addFlag = false -> modal none
+  addFlag = !addFlag;
+  if (addFlag) {
+    modalCont.style.display = "flex";
+  } else {
+    modalCont.style.display = "none";
+  }
+});
+
+removeBtn.addEventListener("click", (e) => {
+  removeFlag = !removeFlag;
+  console.log(removeFlag);
+});
+
+
+
+modalCont.addEventListener("keydown", (e) => {
+  let key = e.key;
+  if (key == "Shift") {
+    createTicket(modalPriorityColor, textareaCont.value);
+    addFlag = false;
+    setModalToDefault();
+  }
+});
+
+function createTicket(ticketColor, ticketTask, ticketID) {
+  let id = ticketID || shortid();
+
+  let ticketCont = document.createElement("div");
+  ticketCont.setAttribute("class", "ticket-cont");
+  ticketCont.innerHTML = `
     <div class="ticket-color ${ticketColor}"></div>
-    <div class="ticket-id">#${ticketID}</div>
+    <div class="ticket-id">#${id}</div>
     <div class="task-area">${ticketTask}</div>
     <div class="ticket-lock">
         <i class="fa-solid fa-lock"></i>
     </div>
     `;
-    mainCont.appendChild(ticketCont);
+  mainCont.appendChild(ticketCont);
 
-    handleLock(ticketCont);
-    handleColor(ticketCont);
-    handleRemoval(ticketCont);
+  // create object of ticket and add to array
+  if (!ticketID)
+  {
+     ticketsArr.push({ ticketColor, ticketTask, ticketID: id });
+     localStorage.setItem("jira_tickets", JSON.stringify(ticketsArr));
+  }
+  console.log(ticketsArr);
+  handleRemoval(ticketCont, id);
+  handleLock(ticketCont, id);
+  handleColor(ticketCont, id);
 }
 
+function handleRemoval(ticket, id) {
+  // removes ticket
+  // removeFlag is true then removes ticket
+  ticket.addEventListener("click", (e)=>{
+    if(!removeFlag) return;
 
+    let idx = getTicketIdx(id);
 
-function removeTicket(ticket)
+    // DB removal
+    ticketsArr.splice(idx,1);
+    let strTicketsArr = JSON.stringify(ticketsArr);
+    localStorage.setItem("jira_tickets", strTicketsArr);
+
+    ticket.remove();// UI removal
+  })
+}
+
+function handleLock(ticket, id) {
+  let ticketLockElem = ticket.querySelector(".ticket-lock");
+  let ticketLock = ticketLockElem.children[0];
+  let ticketTaskArea = ticket.querySelector(".task-area");
+  ticketLock.addEventListener("click", (e) => {
+    let ticketIdx = getTicketIdx(id);
+
+    if (ticketLock.classList.contains(lockClass)) {
+      ticketLock.classList.remove(lockClass);
+      ticketLock.classList.add(unlockClass);
+      ticketTaskArea.setAttribute("contenteditable", "true");
+    } else {
+      ticketLock.classList.remove(unlockClass);
+      ticketLock.classList.add(lockClass);
+      ticketTaskArea.setAttribute("contenteditable", "false");
+    }
+
+    // Modify data in local storage
+    ticketsArr[ticketIdx].ticketTask = ticketTaskArea.innerText;
+    localStorage.setItem("jira_tickets", JSON.stringify(ticketsArr));
+  });
+}
+
+function handleColor(ticket) {
+  let ticketColor = ticket.querySelector(".ticket-color");
+  ticketColor.addEventListener("click", (e) => {
+    // Get ticketIdx from the tickets array
+    let ticketIdx = getTicketIdx(id);
+
+    let currentTicketColor = ticketColor.classList[1];
+    // Get Ticket color idx
+    let currentTicketColorIdx = colors.findIndex((color) => {
+      return currentTicketColor === color;
+    });
+    console.log(currentTicketColor, currentTicketColorIdx);
+    currentTicketColorIdx++;
+    let newTicketColorIdx = currentTicketColorIdx % colors.length;
+    let newTicketColor = colors[newTicketColorIdx];
+    ticketColor.classList.remove(currentTicketColor);
+    ticketColor.classList.add(newTicketColor);
+
+    // Modify data in local storage (priority color change)
+    ticketsArr[ticketIdx].ticketColor = newTicketColor;
+    localStorage.setItem("jira_tickets", JSON.stringify(ticketsArr));
+  });
+}
+
+function getTicketIdx(id)
 {
-    // removes ticket
-    // removeFlag is true then removes ticket 
-    if(removeFlag)
-    ticket.remove();
+  let ticketIdx = ticketsArr.findIndex((ticketObj)=>{
+    return ticketObj.ticketID ===id;
+  })
+  return ticketIdx;
 }
 
-function handleLock(ticket)
+function setModalToDefault()
 {
-    let ticketLockElem = ticket.querySelector(".ticket-lock");
-    let ticketLock = ticketLockElem.children[0];
-    let ticketTaskArea = ticket.querySelector(".task-area");
-    ticketLock.addEventListener("click", (e)=>{
-        if(ticketLock.classList.contains(lockClass))
-        {
-            ticketLock.classList.remove(lockClass);
-            ticketLock.classList.add(unlockClass);
-            ticketTaskArea.setAttribute("contenteditable", "true");
-        }
-        else
-        {
-            ticketLock.classList.remove(unlockClass);
-            ticketLock.classList.add(lockClass);
-            ticketTaskArea.setAttribute("contenteditable", "false");
-        }
-    })
-}
-
-
-
-function handleColor(ticket){
-    let ticketColor = ticket.querySelector(".ticket-color");
-    ticketColor.addEventListener("click", (e)=>{
-        let currentTicketColor = ticketColor.classList[1];
-        // Get Ticket color idx
-        let currentTicketColorIdx = colors.findIndex((color)=>
-        {
-            return currentTicketColor === color;
-        })
-        console.log(currentTicketColor, currentTicketColorIdx);
-        currentTicketColorIdx++;
-        let newTicketColorIdx = currentTicketColorIdx % colors.length;
-        let newTicketColor = colors[newTicketColorIdx];
-        ticketColor.classList.remove(currentTicketColor);
-        ticketColor.classList.add(newTicketColor);
-    })
+  modalCont.style.display = "none";
+  textareaCont.value = "";
+  modalPriorityColor = colors[colors.length-1];
+  allPriorityColors.forEach((priorityColorElem , idx)=>{
+    priorityColorElem.classList.remove("border");
+  })
+  allPriorityColors[allPriorityColors.length - 1].classList.add("border");
 }
