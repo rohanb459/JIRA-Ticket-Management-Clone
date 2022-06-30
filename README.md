@@ -1,4 +1,4 @@
-# JIRA-Ticket-Management-Clone
+# Ticket-Raiser
 <h3>This is Ticket Raising system that deals with tickets that has 4 different priorities. </h3>
 
 <h4>Features:</h4>
